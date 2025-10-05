@@ -380,7 +380,7 @@ class Dataset_Forex(Dataset):
             data_y_value = df_data_y.values
 
         df_stamp = df_raw[['DateTime']][border1:border2]
-        df_stamp['DateTime'] = pd.to_datetime(df_stamp.date)
+        df_stamp['DateTime'] = pd.to_datetime(df_stamp.DateTime)
         data_stamp = time_features(
             df_stamp, timeenc=self.timeenc, freq=self.freq)
 
