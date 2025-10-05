@@ -337,7 +337,7 @@ class Dataset_Forex(Dataset):
         df_raw = pd.read_csv(os.path.join(self.root_path,
                                           self.data_path))
         '''
-        df_raw.columns: ['DateTime', ...(other features), target feature]
+        df_raw.columns: ['date', ...(other features), target feature]
         '''
         # cols = list(df_raw.columns);
         if self.cols:
@@ -346,9 +346,9 @@ class Dataset_Forex(Dataset):
         else:
             cols = list(df_raw.columns)
             cols.remove(self.target)
-            cols.remove('DateTime')
+            cols.remove('date')
 
-        df_raw = df_raw[['DateTime']+cols+[self.target]]
+        df_raw = df_raw[['date']+cols+[self.target]]
 
         num_train = int(len(df_raw)*0.7)
         num_test = int(len(df_raw)*0.2)
@@ -379,8 +379,8 @@ class Dataset_Forex(Dataset):
             data = df_data.values
             data_y_value = df_data_y.values
 
-        df_stamp = df_raw[['DateTime']][border1:border2]
-        df_stamp['DateTime'] = pd.to_datetime(df_stamp.DateTime)
+        df_stamp = df_raw[['date']][border1:border2]
+        df_stamp['date'] = pd.to_datetime(df_stamp.date)
         data_stamp = time_features(
             df_stamp, timeenc=self.timeenc, freq=self.freq)
 
