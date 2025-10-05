@@ -182,7 +182,7 @@ class Exp_Informer(Exp_Basic):
                     time_now = time.time()
 
                 if self.args.use_amp:
-                    scaler.scale(loss).backward()
+                    scaler.scale(loss.float()).backward()
                     scaler.step(model_optim)
                     scaler.update()
                 else:
