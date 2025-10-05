@@ -1,3 +1,5 @@
+export PYTHONPATH=.
+
 python -u main_informer.py \
   --model informer \
   --data XAUUSD_H1 \
