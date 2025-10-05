@@ -1,0 +1,44 @@
+python -u main_informer.py \
+  --model informer \
+  --data XAUUSD_H1 \
+  --root_path ./datasets/ \
+  --data_path XAUUSD_PERIOD_H1_shifted.csv \
+  --features MS \
+  --target close \
+  --freq h \
+  --checkpoints ./informer_checkpoints \
+  --seq_len 96 \
+  --label_len 48 \
+  --pred_len 8 \
+  --enc_in 14 \
+  --dec_in 14 \
+  --c_out 1 \
+  --d_model 512 \
+  --n_heads 8 \
+  --e_layers 2 \
+  --d_layers 1 \
+  --s_layers 1 \
+  --d_ff 2048 \
+  --factor 5 \
+  --padding 0 \
+  --distil \
+  --dropout 0.05 \
+  --attn prob \
+  --embed timeF \
+  --activation gelu \
+  --output_attention \
+  --do_predict \
+  --mix \
+  --itr 5 \
+  --num_workers 0 \
+  --train_epochs 6 \
+  --batch_size 32 \
+  --patience 3 \
+  --des exp \
+  --learning_rate 0.0001 \
+  --loss mse \
+  --lradj type1 \
+  --inverse \
+  --use_amp \
+  --use_gpu True \
+  --gpu 0 
