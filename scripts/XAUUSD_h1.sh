@@ -28,10 +28,8 @@ python -u main_informer.py \
   --attn prob \
   --embed timeF \
   --activation gelu \
-  --output_attention \
-  --do_predict \
   --mix \
-  --itr 5 \
+  --itr 1 \
   --num_workers 0 \
   --train_epochs 6 \
   --batch_size 32 \
@@ -40,7 +38,5 @@ python -u main_informer.py \
   --learning_rate 0.0001 \
   --loss mse \
   --lradj type1 \
-  --inverse \
-  --use_amp \
   --use_gpu True \
   --gpu 0 
