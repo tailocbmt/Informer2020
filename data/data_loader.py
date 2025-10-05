@@ -360,24 +360,18 @@ class Dataset_Forex(Dataset):
         border2 = border2s[self.set_type]
 
         if self.features == 'M' or self.features == 'MS':
-            cols_data = cols
+            cols_data = list(df_raw.columns)
+            cols_data.remove('date')
             df_data = df_raw[cols_data]
-            df_data_y = df_raw[[self.target]]
         elif self.features == 'S':
             df_data = df_raw[[self.target]]
-            df_data_y = df_raw[[self.target]]
 
         if self.scale:
             train_data = df_data[border1s[0]:border2s[0]]
             self.scaler.fit(train_data.values)
             data = self.scaler.transform(df_data.values)
-
-            train_data_y = df_data_y[border1s[0]:border2s[0]]
-            self.scaler.fit(train_data_y.values)
-            data_y_value = self.scaler.transform(train_data_y.values)
         else:
             data = df_data.values
-            data_y_value = df_data_y.values
 
         df_stamp = df_raw[['date']][border1:border2]
         df_stamp['date'] = pd.to_datetime(df_stamp.date)
@@ -386,11 +380,9 @@ class Dataset_Forex(Dataset):
 
         self.data_x = data[border1:border2]
         if self.inverse:
-            # self.data_y = df_data.values[border1:border2]
-            self.data_y = df_data_y.values[border1:border2]
+            self.data_y = df_data.values[border1:border2]
         else:
-            # self.data_y = data[border1:border2]
-            self.data_y = data_y_value[border1:border2]
+            self.data_y = data[border1:border2]
         self.data_stamp = data_stamp
 
     def __getitem__(self, index):
