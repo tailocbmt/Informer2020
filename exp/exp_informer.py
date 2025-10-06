@@ -216,26 +216,31 @@ class Exp_Informer(Exp_Basic):
 
         preds = []
         trues = []
+        data_y = []
 
         for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(test_loader):
             pred, true = self._process_one_batch(
                 test_data, batch_x, batch_y, batch_x_mark, batch_y_mark)
             preds.append(pred.detach().cpu().numpy())
             trues.append(true.detach().cpu().numpy())
+            data_y.append(batch_y[:, :, -1].detach().cpu().numpy())
 
         preds = np.array(preds)
         trues = np.array(trues)
-        print('test shape:', preds.shape, trues.shape)
+        data_y = np.array(data_y)
+        print('test shape:', preds.shape, trues.shape, data_y.shape)
         preds = preds.reshape(-1, preds.shape[-2], preds.shape[-1])
         trues = trues.reshape(-1, trues.shape[-2], trues.shape[-1])
-        print('test shape:', preds.shape, trues.shape)
+        data_y = data_y.reshape(-1, data_y.shape[-2], data_y.shape[-1])
+        print('test shape:', preds.shape, trues.shape, data_y.shape)
 
         # result save
         folder_path = './results/' + setting + '/'
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
 
-        mae, mse, rmse, mape, mspe, acc, prec, rec, f1 = metric(preds, trues)
+        mae, mse, rmse, mape, mspe, acc, prec, rec, f1 = metric(
+            preds, trues, data_y)
         print('mse: {}, mae: {}, rmse: {}, mape: {}, mspe: {}, da: {}, precision: {}, recall: {}, f1-score: {}'.format(mse,
               mae, rmse, mape, mspe, acc, prec, rec, f1))
 
@@ -309,7 +314,7 @@ class Exp_Informer(Exp_Basic):
                                      dec_inp, batch_y_mark)
         if self.args.inverse:
             outputs = dataset_object.inverse_transform(outputs)
-        f_dim = -1 if self.args.features == 'MS' else 0
+        f_dim = -1 if self.args.features == 'MS' else 0  # ???
         batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
 
         return outputs, batch_y
