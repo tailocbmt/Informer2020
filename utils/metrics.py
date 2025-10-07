@@ -20,11 +20,15 @@ def directional_accuracy(pred, true, data_y, target):
         previous_closes = true + np.multiply(true_pctChgs, true)
         pred_pctChgs = pred - previous_closes
 
-        pred_value = vectorized_func(pred_pctChgs)
-        true_value = vectorized_func(true_pctChgs)
+        pred_value = vectorized_func(pred_pctChgs).flatten().astype(int)
+        true_value = vectorized_func(true_pctChgs).flatten().astype(int)
     else:
-        pred_value = vectorized_func(pred)
-        true_value = vectorized_func(true)
+        pred_value = vectorized_func(pred).flatten().astype(int)
+        true_value = vectorized_func(true).flatten().astype(int)
+
+    # print(true.shape, pred.shape)
+    # np.savetxt("true.csv", pred_value, delimiter=",")
+    # np.savetxt("pred.csv", true_value, delimiter=",")
 
     acc = accuracy_score(true_value, pred_value)
     prec = precision_score(true_value, pred_value,
