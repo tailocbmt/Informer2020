@@ -223,7 +223,8 @@ class Exp_Informer(Exp_Basic):
                 test_data, batch_x, batch_y, batch_x_mark, batch_y_mark)
             preds.append(pred.detach().cpu().numpy())
             trues.append(true.detach().cpu().numpy())
-            data_y.append(batch_y[:, :, -1].detach().cpu().numpy())
+            data_y.append(
+                batch_y[:, -self.args.pred_len:, :].detach().cpu().numpy())
 
         preds = np.array(preds)
         trues = np.array(trues)
@@ -240,7 +241,7 @@ class Exp_Informer(Exp_Basic):
             os.makedirs(folder_path)
 
         mae, mse, rmse, mape, mspe, acc, prec, rec, f1 = metric(
-            preds, trues, data_y)
+            preds, trues, data_y, self.args.target, test_data.inverse_transform)
         print('mse: {}, mae: {}, rmse: {}, mape: {}, mspe: {}, da: {}, precision: {}, recall: {}, f1-score: {}'.format(mse,
               mae, rmse, mape, mspe, acc, prec, rec, f1))
 
@@ -314,7 +315,7 @@ class Exp_Informer(Exp_Basic):
                                      dec_inp, batch_y_mark)
         if self.args.inverse:
             outputs = dataset_object.inverse_transform(outputs)
-        f_dim = -1 if self.args.features == 'MS' else 0  # ???
+        f_dim = -1 if self.args.features == 'MS' else 0
         batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
 
         return outputs, batch_y

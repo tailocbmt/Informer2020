@@ -12,15 +12,19 @@ def get_direction_value(value: float) -> int:
     return 0
 
 
-def directional_accuracy(pred, true, data_y):
-    if np.all(true) > 1.0:
-        previous_closes = true + np.multiply(data_y[:, :, -2], true)
-        pred_pctChgs = pred - previous_closes
-
+def directional_accuracy(pred, true, data_y, target):
     vectorized_func = np.vectorize(get_direction_value)
 
-    pred_value = vectorized_func(pred_pctChgs)
-    true_value = vectorized_func(pred_pctChgs)
+    if target == 'close':
+        true_pctChgs = np.expand_dims(data_y[:, :, -2], axis=2)
+        previous_closes = true + np.multiply(true_pctChgs, true)
+        pred_pctChgs = pred - previous_closes
+
+        pred_value = vectorized_func(pred_pctChgs)
+        true_value = vectorized_func(true_pctChgs)
+    else:
+        pred_value = vectorized_func(pred)
+        true_value = vectorized_func(true)
 
     acc = accuracy_score(true_value, pred_value)
     prec = precision_score(true_value, pred_value,
@@ -63,12 +67,13 @@ def MSPE(pred, true):
     return np.mean(np.square((pred - true) / true))
 
 
-def metric(pred, true, data_y):
+def metric(pred, true, data_y, target, inverse_func):
     mae = MAE(pred, true)
     mse = MSE(pred, true)
     rmse = RMSE(pred, true)
     mape = MAPE(pred, true)
     mspe = MSPE(pred, true)
-    acc, prec, rec, f1 = directional_accuracy(pred, true, data_y)
+    acc, prec, rec, f1 = directional_accuracy(inverse_func(
+        pred), inverse_func(true), inverse_func(data_y), target)
 
     return mae, mse, rmse, mape, mspe, acc, prec, rec, f1

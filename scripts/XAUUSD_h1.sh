@@ -11,7 +11,7 @@ python -u main_informer.py \
   --checkpoints ./informer_checkpoints \
   --seq_len 96 \
   --label_len 48 \
-  --pred_len 8 \
+  --pred_len 1 \
   --enc_in 14 \
   --dec_in 14 \
   --c_out 1 \
@@ -29,7 +29,7 @@ python -u main_informer.py \
   --embed timeF \
   --activation gelu \
   --mix \
-  --itr 1 \
+  --itr 10 \
   --num_workers 0 \
   --train_epochs 6 \
   --batch_size 32 \
