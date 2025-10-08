@@ -240,13 +240,44 @@ class Exp_Informer(Exp_Basic):
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
 
-        mae, mse, rmse, mape, mspe, acc, prec, rec, f1 = metric(
+        mae, mse, rmse, mape, mspe, pair_results = metric(
             preds, trues, data_y, self.args.target, test_data.inverse_transform)
-        print('mse: {}, mae: {}, rmse: {}, mape: {}, mspe: {}, da: {}, precision: {}, recall: {}, f1-score: {}'.format(mse,
-              mae, rmse, mape, mspe, acc, prec, rec, f1))
 
-        np.save(folder_path+'metrics.npy',
-                np.array([mae, mse, rmse, mape, mspe, acc, prec, rec, f1]))
+        currency_pairs = ['AUD', 'CAD', 'CHF', 'EUR',
+                          'GBP', 'JPY', 'NZD', 'USD', 'TOTAL', 'NAIVE']
+        for pair in currency_pairs:
+            save_arr = None
+            if pair == 'NAIVE':
+                print('{}: mse: {}, mae: {}, rmse: {}, mape: {}, mspe: {}, da: {}, precision: {}, recall: {}, f1-score: {}'.format(
+                    pair,
+                    mse,
+                    mae,
+                    rmse,
+                    mape,
+                    mspe,
+                    pair_results[pair]['acc'],
+                    pair_results[pair]['prec'],
+                    pair_results[pair]['rec'],
+                    pair_results[pair]['f1']
+                )
+                )
+                save_arr = np.array([mae, mse, rmse, mape, mspe, pair_results[pair]['acc'],
+                                    pair_results[pair]['prec'], pair_results[pair]['rec'], pair_results[pair]['f1']])
+            else:
+                print('da: {}, precision: {}, recall: {}, f1-score: {}'.format(
+                    pair,
+                    pair_results[pair]['acc'],
+                    pair_results[pair]['prec'],
+                    pair_results[pair]['rec'],
+                    pair_results[pair]['f1']
+                )
+                )
+                save_arr = np.array([pair_results[pair]['acc'], pair_results[pair]
+                                    ['prec'], pair_results[pair]['rec'], pair_results[pair]['f1']])
+
+            np.save(folder_path+f'{pair}_metrics.npy',
+                    save_arr)
+
         np.save(folder_path+'pred.npy', preds)
         np.save(folder_path+'true.npy', trues)
 

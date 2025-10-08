@@ -13,22 +13,55 @@ def get_direction_value(value: float) -> int:
 
 
 def directional_accuracy(pred, true, data_y, target):
+    results = {}
     vectorized_func = np.vectorize(get_direction_value)
+
+    currency_pairs = ['AUD', 'CAD', 'CHF', 'EUR',
+                      'GBP', 'JPY', 'NZD', 'USD', 'TOTAL']
+    news_mask = {}
+    for i, pair in enumerate(currency_pairs):
+        if pair == 'TOTAL':
+            total_sum = np.sum(data_y[:, :, 0:8], axis=2)
+            news_mask[pair] = total_sum > 0.0
+        else:
+            news_mask[pair] = data_y[:, :, i] > 0.0
 
     if target == 'close':
         true_pctChgs = np.expand_dims(data_y[:, :, -2], axis=2)
-        previous_closes = true + np.multiply(true_pctChgs, true)
-        pred_pctChgs = pred - previous_closes
+        np.savetxt("pctChg.csv", true_pctChgs[:, :, 0], delimiter=",")
+        previous_closes = true / (1 + (true_pctChgs / 100))
+        pred_pctChgs = (pred - previous_closes) * 100
 
-        pred_value = vectorized_func(pred_pctChgs).flatten().astype(int)
-        true_value = vectorized_func(true_pctChgs).flatten().astype(int)
+        pred_value = vectorized_func(pred_pctChgs)
+        true_value = vectorized_func(true_pctChgs)
     else:
-        pred_value = vectorized_func(pred).flatten().astype(int)
-        true_value = vectorized_func(true).flatten().astype(int)
+        pred_value = vectorized_func(pred)
+        true_value = vectorized_func(true)
 
-    # print(true.shape, pred.shape)
-    # np.savetxt("true.csv", pred_value, delimiter=",")
-    # np.savetxt("pred.csv", true_value, delimiter=",")
+    for i, pair in enumerate(currency_pairs):
+        pair_pred_value = pred_value[news_mask[pair]]
+        pair_true_value = true_value[news_mask[pair]]
+
+        pair_pred_value = pair_pred_value.flatten().astype(int)
+        pair_true_value = pair_true_value.flatten().astype(int)
+
+        pair_acc = accuracy_score(pair_true_value, pair_pred_value)
+        pair_prec = precision_score(pair_true_value, pair_pred_value,
+                                    average="macro", zero_division=0)
+        pair_rec = recall_score(pair_true_value, pair_pred_value,
+                                average="macro", zero_division=0)
+        pair_f1 = f1_score(pair_true_value, pair_pred_value,
+                           average="macro", zero_division=0)
+
+        results[pair] = {
+            'acc': pair_acc,
+            'prec': pair_prec,
+            'rec': pair_rec,
+            'f1': pair_f1
+        }
+
+    pred_value = pred_value.flatten().astype(int)
+    true_value = true_value.flatten().astype(int)
 
     acc = accuracy_score(true_value, pred_value)
     prec = precision_score(true_value, pred_value,
@@ -38,7 +71,14 @@ def directional_accuracy(pred, true, data_y, target):
     f1 = f1_score(true_value, pred_value,
                   average="macro", zero_division=0)
 
-    return acc, prec, rec, f1
+    results['NAIVE'] = {
+        'acc': acc,
+        'prec': prec,
+        'rec': rec,
+        'f1': f1
+    }
+
+    return results
 
 
 def RSE(pred, true):
@@ -77,7 +117,7 @@ def metric(pred, true, data_y, target, inverse_func):
     rmse = RMSE(pred, true)
     mape = MAPE(pred, true)
     mspe = MSPE(pred, true)
-    acc, prec, rec, f1 = directional_accuracy(inverse_func(
+    pair_results = directional_accuracy(inverse_func(
         pred), inverse_func(true), inverse_func(data_y), target)
 
-    return mae, mse, rmse, mape, mspe, acc, prec, rec, f1
+    return mae, mse, rmse, mape, mspe, pair_results
