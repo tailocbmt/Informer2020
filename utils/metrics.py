@@ -13,6 +13,8 @@ def get_direction_value(value: float) -> int:
 
 
 def directional_accuracy(pred, true, data_y, target):
+    np.set_printoptions(suppress=True)
+
     results = {}
     vectorized_func = np.vectorize(get_direction_value)
 
@@ -21,16 +23,23 @@ def directional_accuracy(pred, true, data_y, target):
     news_mask = {}
     for i, pair in enumerate(currency_pairs):
         if pair == 'TOTAL':
-            total_sum = np.sum(data_y[:, :, 0:8], axis=2)
+            total_sum = np.expand_dims(
+                np.sum(data_y[:, :-1, 0:8], axis=2), axis=-1)
             news_mask[pair] = total_sum > 0.0
+
+            # np.savetxt(f"{pair}.csv", data_y[news_mask[pair]],
+            #            delimiter=",", fmt='%.3f')
         else:
-            news_mask[pair] = data_y[:, :, i] > 0.0
+            news_mask[pair] = np.expand_dims(data_y[:, :-1, i] > 0.0, axis=-1)
+            # np.savetxt(f"{pair}.csv", data_y[news_mask[pair]],
+            #            delimiter=",", fmt='%.3f')
 
     if target == 'close':
-        true_pctChgs = np.expand_dims(data_y[:, :, -2], axis=2)
-        np.savetxt("pctChg.csv", true_pctChgs[:, :, 0], delimiter=",")
-        previous_closes = true / (1 + (true_pctChgs / 100))
-        pred_pctChgs = (pred - previous_closes) * 100
+        true_pctChgs = np.expand_dims(data_y[:, 1:, -2], axis=2)
+        previous_closes = np.expand_dims(data_y[:, :-1, -2], axis=2)
+        # np.savetxt(f"closes.csv", previous_closes,
+        #            delimiter=",", fmt='%.3f')
+        pred_pctChgs = (pred - previous_closes) / previous_closes * 100
 
         pred_value = vectorized_func(pred_pctChgs)
         true_value = vectorized_func(true_pctChgs)

@@ -223,8 +223,12 @@ class Exp_Informer(Exp_Basic):
                 test_data, batch_x, batch_y, batch_x_mark, batch_y_mark)
             preds.append(pred.detach().cpu().numpy())
             trues.append(true.detach().cpu().numpy())
+
+            x_y_array = np.concatenate((
+                np.expand_dims(batch_x[:, -1, :].detach().cpu().numpy(), axis=1), batch_y[:, -self.args.pred_len:, :].detach().cpu().numpy()), axis=1)
+
             data_y.append(
-                batch_y[:, -self.args.pred_len:, :].detach().cpu().numpy())
+                x_y_array)
 
         preds = np.array(preds)
         trues = np.array(trues)
@@ -248,7 +252,7 @@ class Exp_Informer(Exp_Basic):
         for pair in currency_pairs:
             save_arr = None
             if pair == 'NAIVE':
-                print('{}: mse: {}, mae: {}, rmse: {}, mape: {}, mspe: {}, da: {}, precision: {}, recall: {}, f1-score: {}'.format(
+                print('{}= {}: mse: {}, mae: {}, rmse: {}, mape: {}, mspe: {}, da: {}, precision: {}, recall: {}, f1-score: {}'.format(
                     pair,
                     mse,
                     mae,
@@ -264,7 +268,7 @@ class Exp_Informer(Exp_Basic):
                 save_arr = np.array([mae, mse, rmse, mape, mspe, pair_results[pair]['acc'],
                                     pair_results[pair]['prec'], pair_results[pair]['rec'], pair_results[pair]['f1']])
             else:
-                print('da: {}, precision: {}, recall: {}, f1-score: {}'.format(
+                print('{}= da: {}, precision: {}, recall: {}, f1-score: {}'.format(
                     pair,
                     pair_results[pair]['acc'],
                     pair_results[pair]['prec'],
