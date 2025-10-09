@@ -252,7 +252,7 @@ class Exp_Informer(Exp_Basic):
         for pair in currency_pairs:
             save_arr = None
             if pair == 'NAIVE':
-                print('{}= {}: mse: {}, mae: {}, rmse: {}, mape: {}, mspe: {}, da: {}, precision: {}, recall: {}, f1-score: {}'.format(
+                print('{}= mse: {}, mae: {}, rmse: {}, mape: {}, mspe: {}, da: {}, precision: {}, recall: {}, f1-score: {}'.format(
                     pair,
                     mse,
                     mae,
